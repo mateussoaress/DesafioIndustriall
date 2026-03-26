@@ -1,0 +1,459 @@
+{
+	"info": {
+		"_postman_id": "purchase-order-api-collection",
+		"name": "Purchase Order API",
+		"description": "Coleção de endpoints da API de Pedido de Compras - Desafio Técnico IndustriALL",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5009/api/v1"
+		},
+		{
+			"key": "orderId",
+			"value": ""
+		},
+		{
+			"key": "collaboratorId",
+			"value": ""
+		},
+		{
+			"key": "suppliesId",
+			"value": ""
+		},
+		{
+			"key": "managerId",
+			"value": ""
+		},
+		{
+			"key": "directorId",
+			"value": ""
+		}
+	],
+	"item": [
+		{
+			"name": "Users",
+			"description": "Endpoints para consulta de usuários do sistema.",
+			"item": [
+				{
+					"name": "Listar todos os usuários",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"jsonData.forEach(function(user) {",
+									"    if (user.profile === 'Collaborator') pm.collectionVariables.set('collaboratorId', user.id);",
+									"    if (user.profile === 'Supplies') pm.collectionVariables.set('suppliesId', user.id);",
+									"    if (user.profile === 'Manager') pm.collectionVariables.set('managerId', user.id);",
+									"    if (user.profile === 'Director') pm.collectionVariables.set('directorId', user.id);",
+									"});",
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Users",
+							"host": ["{{baseUrl}}"],
+							"path": ["Users"]
+						},
+						"description": "Retorna todos os usuários cadastrados no sistema. Executa primeiro para capturar os IDs automaticamente."
+					}
+				},
+				{
+					"name": "Buscar usuário por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Users/{{collaboratorId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["Users", "{{collaboratorId}}"]
+						},
+						"description": "Retorna os dados de um usuário específico pelo identificador."
+					}
+				}
+			]
+		},
+		{
+			"name": "PurchaseOrders - CRUD",
+			"description": "Endpoints de criação, consulta e atualização de pedidos de compra.",
+			"item": [
+				{
+					"name": "Criar pedido (R$50 - só Supplies)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set('orderId', jsonData.id);",
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"pm.test('Status is Draft', function () {",
+									"    pm.expect(jsonData.status).to.eql('Draft');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"creatorUserId\": \"{{collaboratorId}}\",\n  \"items\": [\n    {\n      \"productName\": \"Caneta\",\n      \"quantity\": 10,\n      \"unitPrice\": 5.00\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/PurchaseOrders",
+							"host": ["{{baseUrl}}"],
+							"path": ["PurchaseOrders"]
+						},
+						"description": "Cria um pedido de R$50 (10 x R$5). Alçada: apenas Suprimentos."
+					}
+				},
+				{
+					"name": "Criar pedido (R$500 - Supplies + Manager)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set('orderId', jsonData.id);",
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"creatorUserId\": \"{{collaboratorId}}\",\n  \"items\": [\n    {\n      \"productName\": \"Teclado Mecânico\",\n      \"quantity\": 5,\n      \"unitPrice\": 100.00\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/PurchaseOrders",
+							"host": ["{{baseUrl}}"],
+							"path": ["PurchaseOrders"]
+						},
+						"description": "Cria um pedido de R$500 (5 x R$100). Alçada: Suprimentos + Gestor."
+					}
+				},
+				{
+					"name": "Criar pedido (R$5000 - Supplies + Manager + Director)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set('orderId', jsonData.id);",
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"creatorUserId\": \"{{collaboratorId}}\",\n  \"items\": [\n    {\n      \"productName\": \"Notebook Dell\",\n      \"quantity\": 2,\n      \"unitPrice\": 2500.00\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/PurchaseOrders",
+							"host": ["{{baseUrl}}"],
+							"path": ["PurchaseOrders"]
+						},
+						"description": "Cria um pedido de R$5000 (2 x R$2500). Alçada: Suprimentos + Gestor + Diretor."
+					}
+				},
+				{
+					"name": "Listar todos os pedidos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/PurchaseOrders",
+							"host": ["{{baseUrl}}"],
+							"path": ["PurchaseOrders"]
+						},
+						"description": "Retorna todos os pedidos de compra cadastrados."
+					}
+				},
+				{
+					"name": "Buscar pedido por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/PurchaseOrders/{{orderId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["PurchaseOrders", "{{orderId}}"]
+						},
+						"description": "Retorna os dados completos de um pedido pelo identificador, incluindo itens, aprovações e histórico."
+					}
+				},
+				{
+					"name": "Atualizar pedido (Draft ou UnderReview)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"productName\": \"Caneta Azul\",\n      \"quantity\": 20,\n      \"unitPrice\": 3.00\n    },\n    {\n      \"productName\": \"Borracha\",\n      \"quantity\": 10,\n      \"unitPrice\": 2.00\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/PurchaseOrders/{{orderId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["PurchaseOrders", "{{orderId}}"]
+						},
+						"description": "Atualiza os itens de um pedido em rascunho (Draft) ou em revisão (UnderReview)."
+					}
+				}
+			]
+		},
+		{
+			"name": "PurchaseOrders - Fluxo de Aprovação",
+			"description": "Endpoints do fluxo de aprovação hierárquica: submit, approve, request-revision, resubmit e cancel.",
+			"item": [
+				{
+					"name": "Enviar para aprovação (Submit)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"{{collaboratorId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/PurchaseOrders/{{orderId}}/submit",
+							"host": ["{{baseUrl}}"],
+							"path": ["PurchaseOrders", "{{orderId}}", "submit"]
+						},
+						"description": "Envia o pedido para o fluxo de aprovação. O pedido deve estar no estado Draft. (RN3, RN4)"
+					}
+				},
+				{
+					"name": "Aprovar - Suprimentos (Supplies)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"{{suppliesId}}\",\n  \"approverLevel\": \"Supplies\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/PurchaseOrders/{{orderId}}/approve",
+							"host": ["{{baseUrl}}"],
+							"path": ["PurchaseOrders", "{{orderId}}", "approve"]
+						},
+						"description": "Aprovação pelo nível Suprimentos. Primeiro nível obrigatório para todos os pedidos. (RN3, RN4)"
+					}
+				},
+				{
+					"name": "Aprovar - Gestor (Manager)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"{{managerId}}\",\n  \"approverLevel\": \"Manager\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/PurchaseOrders/{{orderId}}/approve",
+							"host": ["{{baseUrl}}"],
+							"path": ["PurchaseOrders", "{{orderId}}", "approve"]
+						},
+						"description": "Aprovação pelo nível Gestor. Necessário para pedidos acima de R$100. (RN3, RN4)"
+					}
+				},
+				{
+					"name": "Aprovar - Diretor (Director)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"{{directorId}}\",\n  \"approverLevel\": \"Director\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/PurchaseOrders/{{orderId}}/approve",
+							"host": ["{{baseUrl}}"],
+							"path": ["PurchaseOrders", "{{orderId}}", "approve"]
+						},
+						"description": "Aprovação pelo nível Diretor. Necessário para pedidos acima de R$1000. (RN3, RN4)"
+					}
+				},
+				{
+					"name": "Solicitar revisão - Supplies",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"{{suppliesId}}\",\n  \"approverLevel\": \"Supplies\",\n  \"comments\": \"Quantidade de itens parece excessiva. Favor revisar.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/PurchaseOrders/{{orderId}}/request-revision",
+							"host": ["{{baseUrl}}"],
+							"path": ["PurchaseOrders", "{{orderId}}", "request-revision"]
+						},
+						"description": "Solicita revisão pelo nível Suprimentos. O campo comments é obrigatório. (RN5)"
+					}
+				},
+				{
+					"name": "Solicitar revisão - Manager",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"{{managerId}}\",\n  \"approverLevel\": \"Manager\",\n  \"comments\": \"Valores acima do orçamento. Favor revisar.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/PurchaseOrders/{{orderId}}/request-revision",
+							"host": ["{{baseUrl}}"],
+							"path": ["PurchaseOrders", "{{orderId}}", "request-revision"]
+						},
+						"description": "Solicita revisão pelo nível Gestor. O campo comments é obrigatório. (RN5)"
+					}
+				},
+				{
+					"name": "Solicitar revisão - Director",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"{{directorId}}\",\n  \"approverLevel\": \"Director\",\n  \"comments\": \"Necessário nova cotação antes de aprovar.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/PurchaseOrders/{{orderId}}/request-revision",
+							"host": ["{{baseUrl}}"],
+							"path": ["PurchaseOrders", "{{orderId}}", "request-revision"]
+						},
+						"description": "Solicita revisão pelo nível Diretor. O campo comments é obrigatório. (RN5)"
+					}
+				},
+				{
+					"name": "Reenviar após revisão (Resubmit)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"{{collaboratorId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/PurchaseOrders/{{orderId}}/resubmit",
+							"host": ["{{baseUrl}}"],
+							"path": ["PurchaseOrders", "{{orderId}}", "resubmit"]
+						},
+						"description": "Reenvia o pedido após revisão. A cadeia de aprovação reinicia do início. O pedido deve estar no estado UnderReview. (RN5)"
+					}
+				},
+				{
+					"name": "Cancelar pedido - Supplies",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"{{suppliesId}}\",\n  \"approverLevel\": \"Supplies\",\n  \"comments\": \"Pedido cancelado por decisão da área de suprimentos.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/PurchaseOrders/{{orderId}}/cancel",
+							"host": ["{{baseUrl}}"],
+							"path": ["PurchaseOrders", "{{orderId}}", "cancel"]
+						},
+						"description": "Cancela o pedido pelo nível Suprimentos. O campo comments é obrigatório. (RN8)"
+					}
+				},
+				{
+					"name": "Cancelar pedido - Manager",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"{{managerId}}\",\n  \"approverLevel\": \"Manager\",\n  \"comments\": \"Pedido cancelado por decisão da gestão.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/PurchaseOrders/{{orderId}}/cancel",
+							"host": ["{{baseUrl}}"],
+							"path": ["PurchaseOrders", "{{orderId}}", "cancel"]
+						},
+						"description": "Cancela o pedido pelo nível Gestor. O campo comments é obrigatório. (RN8)"
+					}
+				},
+				{
+					"name": "Cancelar pedido - Director",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"{{directorId}}\",\n  \"approverLevel\": \"Director\",\n  \"comments\": \"Pedido cancelado por decisão da diretoria.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/PurchaseOrders/{{orderId}}/cancel",
+							"host": ["{{baseUrl}}"],
+							"path": ["PurchaseOrders", "{{orderId}}", "cancel"]
+						},
+						"description": "Cancela o pedido pelo nível Diretor. O campo comments é obrigatório. (RN8)"
+					}
+				}
+			]
+		}
+	]
+}
